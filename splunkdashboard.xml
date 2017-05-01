@@ -1,0 +1,73 @@
+<form>
+  <label>vRA Compliance</label>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="dropdown" token="host" searchWhenChanged="true">
+      <label>Host</label>
+      <fieldForLabel>source</fieldForLabel>
+      <fieldForValue>source</fieldForValue>
+      <search>
+        <query>sourcetype=web_event | dedup source</query>
+      </search>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>vRealize Automation 7.2 Appliance Hardening</title>
+      <chart>
+        <search>
+          <query>sourcetype=web_event source="$host$" | rename checks{}.status as status | stats count by status</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <title>Passing Checks</title>
+        <search>
+          <query>sourcetype=web_event source="$host$" | spath checks{}.status output=modules | mvexpand modules | search modules=pass | stats count</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="rangeColors">["0x65a637","0x65a637"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="underLabel">Pass</option>
+        <option name="useColors">1</option>
+      </single>
+      <single>
+        <title>Failing Checks</title>
+        <search>
+          <query>sourcetype=web_event source="$host$" | spath checks{}.status output=modules | mvexpand modules | search modules=fail | stats count</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="rangeColors">["0x65a637","0xd93f3c"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="underLabel">Fail</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>sourcetype=web_event source="$host$" | rename checks{}.check as ID, checks{}.check_description as Description, checks{}.status as Status | table ID, Description, Status</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">50</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="percentagesRow">false</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>
